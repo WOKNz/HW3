@@ -16,3 +16,4 @@ class Triangle:  # Class of triangle with option to have ID
         self.t2 = t2
         self.t3 = t3
         self.list_of_points = [p1.id, p2.id, p3.id]
+

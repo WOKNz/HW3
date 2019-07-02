@@ -8,6 +8,7 @@ if __name__ == '__main__':
     points = []
     triangles = []
     lines = [[(0, 1), (1, 1)], [(2, 3), (3, 3)], [(1, 2), (1, 3)]]
+    const = 1000.0
 
     # Reading points
     with open('points.txt', "r", encoding="utf8") as stringlines:
@@ -34,10 +35,11 @@ if __name__ == '__main__':
         plt.plot([triangles[i].p1.x, triangles[i].p2.x, triangles[i].p3.x, triangles[i].p1.x],
                  [triangles[i].p1.y, triangles[i].p2.y,
                   triangles[i].p3.y, triangles[i].p1.y], 'b')
-    #plt.show()
+    # plt.show()
+    axes = plt.axis()
 
-    for i in range(0, len(triangles) ):
-        for j in range(0, len(triangles) ):
+    for i in range(0, len(triangles)):
+        for j in range(0, len(triangles)):
             if j == i:
                 continue
             if (triangles[i].list_of_points[0] in triangles[j].list_of_points) and (
@@ -61,12 +63,52 @@ if __name__ == '__main__':
         y_value = -(x_value - (t.p1.x + t.p2.x) / 2) / (slope(t.p1, t.p2)) + (t.p1.y + t.p2.y) / 2
         return Point(x_value, y_value)
 
+
+    def infpoint(p1, p2, p3, center):
+        def slope(p1: Point, p2: Point):
+            if p1.x > p2.x:
+                return (p1.y - p2.y) / (p1.x - p2.x)
+            else:
+                return (p2.y - p1.y) / (p2.x - p1.x)
+
+        def yofprp(p1, p2, p3, some_x):
+            return -(some_x - p3.x) / (slope(p1, p2)) + p3.y
+
+        def yofseg(p1, p2, some_x):
+            return slope(p1, p2) * (some_x - p1.x) + p1.y
+
+        dx = 0
+        dy = 0
+        if p1.x > p2.x:
+            dx = p1.x - p2.x
+            dy = p1.y - p2.y
+        else:
+            dx = p2.x - p1.x
+            dy = p2.y - p1.y
+
+        if ((dx > 0) and (dy < 0)) and p3.y < yofseg(p1, p2, p3.x):
+            return Point(const, (-(const - center.x)) / (slope(t.p1, t.p2)) + center.y)
+
+        elif ((dx > 0) and (dy > 0)) and p3.y > yofseg(p1, p2, p3.x):
+            return Point(const, (-(const - center.x)) / (slope(t.p1, t.p2)) + center.y)
+
+        elif ((dx > 0) and (dy < 0)) and p3.y > yofseg(p1, p2, p3.x):
+            return Point(-const, (-(-const - center.x)) / (slope(t.p1, t.p2)) + center.y)
+
+        elif ((dx > 0) and (dy > 0)) and p3.y < yofseg(p1, p2, p3.x):
+            return Point(-const, (-(-const - center.x)) / (slope(t.p1, t.p2)) + center.y)
+        else:
+            print('bad')
+
+
     Voronoi_vertices = []
     Voronoi_edges = []
 
-    for t in triangles: # Generating edges of Voronoi + vertexes
+    for t in triangles:  # Generating edges of Voronoi + vertexes
         if t.t1 == None:
             Voronoi_vertices.append(cntoftrg(t))
+            Voronoi_edges.append(cntoftrg(t))
+            Voronoi_edges.append(infpoint(t.p1, t.p2, t.p3, cntoftrg(t)))
             Voronoi_edges.append(cntoftrg(t))
             Voronoi_edges.append(cntoftrg(t.t2))
             Voronoi_edges.append(cntoftrg(t))
@@ -77,6 +119,8 @@ if __name__ == '__main__':
             Voronoi_edges.append(cntoftrg(t))
             Voronoi_edges.append(cntoftrg(t.t1))
             Voronoi_edges.append(cntoftrg(t))
+            Voronoi_edges.append(infpoint(t.p1, t.p3, t.p2, cntoftrg(t)))
+            Voronoi_edges.append(cntoftrg(t))
             Voronoi_edges.append(cntoftrg(t.t3))
             continue
         if t.t3 == None:
@@ -85,6 +129,8 @@ if __name__ == '__main__':
             Voronoi_edges.append(cntoftrg(t.t1))
             Voronoi_edges.append(cntoftrg(t))
             Voronoi_edges.append(cntoftrg(t.t2))
+            Voronoi_edges.append(cntoftrg(t))
+            Voronoi_edges.append(infpoint(t.p2, t.p3, t.p1, cntoftrg(t)))
             continue
         else:
             Voronoi_vertices.append(cntoftrg(t))
@@ -99,21 +145,10 @@ if __name__ == '__main__':
     for i in range(0, len(Voronoi_vertices)):
         plt.plot(Voronoi_vertices[i].x, Voronoi_vertices[i].y, 'ro--')
     for i in range(0, len(Voronoi_edges), 2):
-        plt.plot([Voronoi_edges[i].x, Voronoi_edges[i+1].x],
-                 [Voronoi_edges[i].y, Voronoi_edges[i+1].y], 'r')
-    plt.show()
+        plt.plot([Voronoi_edges[i].x, Voronoi_edges[i + 1].x],
+                 [Voronoi_edges[i].y, Voronoi_edges[i + 1].y], 'r')
 
-    #
-    # for triangle in triangles:
-    #     if triangle.p1.id, triangles) and a, list):
-    #
-    #
-    print(cntoftrg(triangles[0]).x)
-    # c = np.array([(0, 0, 1, 1), (0, 1, 0, 1), (0, 0, 1, 1)])
-    #
-    # lc = mc.LineCollection(lines, colors=c, linewidths=2)
-    # fig, ax = pl.subplots()
-    # ax.add_collection(lc)
-    # ax.autoscale()
-    # ax.margins(0.1)
-    # fig.show()
+    plt.xlim([axes[0], axes[1]])
+    plt.ylim([axes[2], axes[3]])
+    plt.show()
+    print('Done')
