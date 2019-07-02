@@ -1,5 +1,5 @@
 class Point:  # Class of Point with option to have ID
-    def __init__(self, x, y, z, sid=None):
+    def __init__(self, x, y, z=None, sid=None):
         self.x = x
         self.y = y
         self.z = z

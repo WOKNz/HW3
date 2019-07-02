@@ -34,10 +34,12 @@ if __name__ == '__main__':
         plt.plot([triangles[i].p1.x, triangles[i].p2.x, triangles[i].p3.x, triangles[i].p1.x],
                  [triangles[i].p1.y, triangles[i].p2.y,
                   triangles[i].p3.y, triangles[i].p1.y], 'b')
-    plt.show()
+    #plt.show()
 
-    for i in range(0, len(triangles) - 1):
-        for j in range(i + 1, len(triangles) - 1):
+    for i in range(0, len(triangles) ):
+        for j in range(0, len(triangles) ):
+            if j == i:
+                continue
             if (triangles[i].list_of_points[0] in triangles[j].list_of_points) and (
                     triangles[i].list_of_points[1] in triangles[j].list_of_points):
                 triangles[i].t1 = triangles[j]
@@ -48,16 +50,65 @@ if __name__ == '__main__':
                     triangles[i].list_of_points[2] in triangles[j].list_of_points):
                 triangles[i].t3 = triangles[j]
 
-    # list_of_contains = []
-    # for i, triangle in enumerate(triangles):
-    #     list_of_contains.append(triangle.list_of_points)
+
+    def cntoftrg(t: Triangle):  # Solving center of triangle by 3 points (two perpendicular lines)
+        def slope(p1: Point, p2: Point):
+            return (p2.y - p1.y) / (p2.x - p1.x)
+
+        x_value = (slope(t.p1, t.p2) * slope(t.p2, t.p3) * (t.p1.y - t.p3.y) + slope(t.p2, t.p3) * (
+                t.p1.x + t.p2.x) - slope(t.p1, t.p2) * (t.p2.x + t.p3.x)) / (
+                          2 * (-slope(t.p1, t.p2) + slope(t.p2, t.p3)))
+        y_value = -(x_value - (t.p1.x + t.p2.x) / 2) / (slope(t.p1, t.p2)) + (t.p1.y + t.p2.y) / 2
+        return Point(x_value, y_value)
+
+    Voronoi_vertices = []
+    Voronoi_edges = []
+
+    for t in triangles: # Generating edges of Voronoi + vertexes
+        if t.t1 == None:
+            Voronoi_vertices.append(cntoftrg(t))
+            Voronoi_edges.append(cntoftrg(t))
+            Voronoi_edges.append(cntoftrg(t.t2))
+            Voronoi_edges.append(cntoftrg(t))
+            Voronoi_edges.append(cntoftrg(t.t3))
+            continue
+        if t.t2 == None:
+            Voronoi_vertices.append(cntoftrg(t))
+            Voronoi_edges.append(cntoftrg(t))
+            Voronoi_edges.append(cntoftrg(t.t1))
+            Voronoi_edges.append(cntoftrg(t))
+            Voronoi_edges.append(cntoftrg(t.t3))
+            continue
+        if t.t3 == None:
+            Voronoi_vertices.append(cntoftrg(t))
+            Voronoi_edges.append(cntoftrg(t))
+            Voronoi_edges.append(cntoftrg(t.t1))
+            Voronoi_edges.append(cntoftrg(t))
+            Voronoi_edges.append(cntoftrg(t.t2))
+            continue
+        else:
+            Voronoi_vertices.append(cntoftrg(t))
+            Voronoi_edges.append(cntoftrg(t))
+            Voronoi_edges.append(cntoftrg(t.t1))
+            Voronoi_edges.append(cntoftrg(t))
+            Voronoi_edges.append(cntoftrg(t.t2))
+            Voronoi_edges.append(cntoftrg(t))
+            Voronoi_edges.append(cntoftrg(t.t3))
+
+    # Plotting both points and triangles (with duplicates)
+    for i in range(0, len(Voronoi_vertices)):
+        plt.plot(Voronoi_vertices[i].x, Voronoi_vertices[i].y, 'ro--')
+    for i in range(0, len(Voronoi_edges), 2):
+        plt.plot([Voronoi_edges[i].x, Voronoi_edges[i+1].x],
+                 [Voronoi_edges[i].y, Voronoi_edges[i+1].y], 'r')
+    plt.show()
+
     #
     # for triangle in triangles:
     #     if triangle.p1.id, triangles) and a, list):
     #
-    # Voronoi_vertices = []
     #
-    print('test')
+    print(cntoftrg(triangles[0]).x)
     # c = np.array([(0, 0, 1, 1), (0, 1, 0, 1), (0, 0, 1, 1)])
     #
     # lc = mc.LineCollection(lines, colors=c, linewidths=2)
